@@ -1,13 +1,15 @@
 terraform {
-  required_version = ">= 0.14.0"
+  required_version = ">= 1.2.2"
+  experiments      = [module_variable_optional_attrs]
+
   required_providers {
     aws = {
       source  = "hashicorp/aws"
       version = ">= 4.0.0, < 5.0.0"
     }
-    awscc = {
-      source  = "hashicorp/awscc"
-      version = ">= 0.24.0"
-    }
+    # tfe = {
+    #   source  = "varset/hashicorp/tfe"
+    #   version = ">= 0.0.1"
+    # }
   }
 }

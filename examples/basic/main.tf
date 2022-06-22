@@ -3,3 +3,27 @@
 # per use-case. The code below should not be copied directly but referenced in order
 # to build your own root module that invokes this module
 #####################################################################################
+
+data "tfe_variable_set" "creds" {
+  name         = var.creds_variable_set_name
+  organization = var.organization
+}
+
+module "multi_region_deployment" {
+  source = "../.."
+
+  shared_variable_set_id = data.tfe_variable_set.creds.id
+  organization           = var.organization
+  vcs_repo               = var.vcs_repo
+  shared_variable_set    = var.shared_variable_set
+  workspaces = {
+    eastcoast = {
+      vars = {
+        AWS_REGION = {
+          value = "us-east-1"
+        }
+      }
+    }
+    westcoast = {}
+  }
+}

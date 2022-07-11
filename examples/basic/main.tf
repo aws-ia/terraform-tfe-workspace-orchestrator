@@ -15,7 +15,11 @@ module "multi_region_deployment" {
   shared_variable_set_id = data.tfe_variable_set.creds.id
   organization           = var.organization
   vcs_repo               = var.vcs_repo
-  shared_variable_set    = var.shared_variable_set
+  shared_variable_set = {
+    test  = { value = 123 } # implicit category = "env"
+    test2 = { value = 123 , category = "terraform"}
+  }
+
   workspaces = {
     eastcoast = {
       vars = {

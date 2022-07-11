@@ -38,7 +38,7 @@ resource "tfe_workspace" "main" {
 }
 
 # attach pre-existing variable set to workspaces
-resource "tfe_variable_set_workspace_attachment" "shared_preexisting_variable_set_ids" {
+resource "tfe_workspace_variable_set" "shared_preexisting_variable_set_ids" {
   for_each = var.shared_variable_set_id == null ? {} : tfe_workspace.main
 
   variable_set_id = var.shared_variable_set_id

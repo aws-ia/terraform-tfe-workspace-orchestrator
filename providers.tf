@@ -7,9 +7,9 @@ terraform {
       source  = "hashicorp/aws"
       version = ">= 4.0.0, < 5.0.0"
     }
-    # tfe = {
-    #   source  = "varset/hashicorp/tfe"
-    #   version = ">= 0.0.1"
-    # }
+    tfe = {
+      source  = "hashicorp/tfe"
+      version = ">= 0.33.0"
+    }
   }
 }

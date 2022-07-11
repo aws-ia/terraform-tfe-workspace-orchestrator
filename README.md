@@ -1,74 +1,97 @@
 <!-- BEGIN_TF_DOCS -->
-# Creating modules for AWS I&A Organization
+# Terraform Cloud Multi-Region Deployment with Workspaces
 
-This repo template is used to seed Terraform Module templates for the [AWS I&A GitHub organization](https://github.com/aws-ia). Usage of this template is allowed per included license. PRs to this template will be considered but are not guaranteed to be included. Consider creating an issue to discuss a feature you want to include before taking the time to create a PR.
-### TL;DR
+If you want to deploy a terraform module to multiple locations (different VPCs, Regions, Accounts) this module can help. In most examples we use regions as the location separator but that doesnt have to be the case. The premise is simple, create your root module in a public VCS repo then using your Terraform Cloud (TFC) Organization, create workspaces for each deployment location.
 
-1. [install pre-commit](https://pre-commit.com/)
-2. configure pre-commit: `pre-commit install`
-3. install required tools
-    - [tflint](https://github.com/terraform-linters/tflint)
-    - [tfsec](https://aquasecurity.github.io/tfsec/v1.0.11/)
-    - [terraform-docs](https://github.com/terraform-docs/terraform-docs)
-    - [golang](https://go.dev/doc/install) (for macos you can use `brew`)
-    - [coreutils](https://www.gnu.org/software/coreutils/)
+## Usage
 
-Write code according to [I&A module standards](https://aws-ia.github.io/standards-terraform/)
+To use you must have:
 
-## Module Documentation
+1. Terraform Cloud Organization with Admin Access
+1. VCS repo with your HCL root module
+1. Connect the repo to TFC (To be automated)
 
-**Do not manually update README.md**. `terraform-docs` is used to generate README files. For any instructions an content, please update [.header.md](./.header.md) then simply run `terraform-docs ./` or allow the `pre-commit` to do so.
+Once the above is complete, simply execute this module with references for each location in a way that TFC can reference.
 
-## Terratest
+## Workspaces
 
-Please include tests to validate your examples/<> root modules, at a minimum. This can be accomplished with usually only slight modifications to the [boilerplate test provided in this template](./test/examples\_basic\_test.go)
+Workspaces are defined in a nested map as each deployment location. A workspace key within the `var.workspaces` can utilize _any_ [workspace argument](https://registry.terraform.io/providers/hashicorp/tfe/latest/docs/resources/workspace#argument-reference).
 
-### Configure and run Terratest
+It can also accept `var.workspaces.<>.vars` which can accept variable declarations as described [below](#variables).
 
-1. Install
+## Variables
 
-    [golang](https://go.dev/doc/install) (for macos you can use `brew`)
-2. Change directory into the test folder.
-    
-    `cd test`
-3. Initialize your test
-    
-    go mod init github.com/[github org]/[repository]
+This module allows you to specify variables in 3 different ways:
 
-    `go mod init github.com/aws-ia/terraform-aws-vpc`
-4. Run tidy
+1. Attach a pre-created [variable set id](https://www.terraform.io/cloud-docs/api-docs/variable-sets) to each workspace
+1. Declare variables within `shared_variable_set` as `{key = value}` to be shared to each workspace.
+1. Specify on a per-workspace using the nested map structure below
 
-    `git mod tidy`
-5. Install Terratest
+```terraform
+module "multi_region_deployment" {
+  source = "../.."
+  ...
+  workspaces = {
+    eastcoast = {
+      vars = {
+        AWS_REGION = {
+          value = "us-east-1"
+        }
+        my_tf_var = {
+          value     = "test"
+          category  = "terraform"
+        }
+      }
+    }
+    westcoast = {...}
+  }
+```
 
-    `go get github.com/gruntwork-io/terratest/modules/terraform`
-6. Run test (You can have multiple test files).
-    - Run all tests
+## Examples
 
-        `go test`
-    - Run a specific test with a timeout
+For examples see [here](https://github.com/aws-ia/terraform-tfe-workspace-orchestrator/tree/main/examples)
 
-        `go test -run examples_basic_test.go -timeout 45m`
+### Example terraform.tfvars
 
-## Module Standards
+```terraform
+organization            = "<>"
 
-For best practices and information on developing with Terraform, see the [I&A Module Standards](https://aws-ia.github.io/standards-terraform/)
+# variable set contains my AWS_ACCESS_KEY_ID & AWS_SECRET_ACCESS_KEY, attach to all workspaces
+creds_variable_set_name = "dev_aws_creds"
 
-## Continuous Integration
+vcs_repo = {
+  identifier     = "drewmullen/aws-infra" # https://github.com/drewmullen/aws-infra
+  oauth_token_id = "<oauth token from TFC>"
+  branch         = "master"
+}
 
-The I&A team uses AWS CodeBuild to perform continuous integration (CI) within the organization. Our CI uses the a repo's `.pre-commit-config.yaml` file as well as some other checks. All PRs with other CI will be rejected. See our [FAQ](https://aws-ia.github.io/standards-terraform/faq/#are-modules-protected-by-ci-automation) for more details.
+shared_variable_set = {
+  "test"  = { value = 123 }
+  "test2" = { value = 123 }
+  workspace_name = {
+    value    = "test"
+    category = "terraform"
+  }
+}
+```
+
+## Known Issues
+
+Currently there is no way to trigger a workspace rebuild on creation. If the inital builds fail you can rekick them off. This will hopefully be resolved in a [future release](https://github.com/hashicorp/terraform-provider-tfe/issues/534)
 
 ## Requirements
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 0.14.0 |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.2.2 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 4.0.0, < 5.0.0 |
-| <a name="requirement_awscc"></a> [awscc](#requirement\_awscc) | >= 0.24.0 |
+| <a name="requirement_tfe"></a> [tfe](#requirement\_tfe) | >= 0.33.0 |
 
 ## Providers
 
-No providers.
+| Name | Version |
+|------|---------|
+| <a name="provider_tfe"></a> [tfe](#provider\_tfe) | 0.0.1 |
 
 ## Modules
 
@@ -76,11 +99,25 @@ No modules.
 
 ## Resources
 
-No resources.
+| Name | Type |
+|------|------|
+| [tfe_variable.per_workspace](https://registry.terraform.io/providers/hashicorp/tfe/latest/docs/resources/variable) | resource |
+| [tfe_variable.shared_to_all_workspaces](https://registry.terraform.io/providers/hashicorp/tfe/latest/docs/resources/variable) | resource |
+| [tfe_variable_set.per_workspace](https://registry.terraform.io/providers/hashicorp/tfe/latest/docs/resources/variable_set) | resource |
+| [tfe_variable_set.shared_to_all_workspaces](https://registry.terraform.io/providers/hashicorp/tfe/latest/docs/resources/variable_set) | resource |
+| [tfe_workspace.main](https://registry.terraform.io/providers/hashicorp/tfe/latest/docs/resources/workspace) | resource |
+| [tfe_workspace_variable_set.shared_preexisting_variable_set_ids](https://registry.terraform.io/providers/hashicorp/tfe/latest/docs/resources/workspace_variable_set) | resource |
 
 ## Inputs
 
-No inputs.
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_organization"></a> [organization](#input\_organization) | n/a | `string` | n/a | yes |
+| <a name="input_workspaces"></a> [workspaces](#input\_workspaces) | n/a | `any` | n/a | yes |
+| <a name="input_shared_variable_set"></a> [shared\_variable\_set](#input\_shared\_variable\_set) | A variable set ID to create and set to all workspaces. Use if you want to share variables across all workspaces. To set per-workspace, see `var.workspaces`. | `map(map(string))` | `{}` | no |
+| <a name="input_shared_variable_set_id"></a> [shared\_variable\_set\_id](#input\_shared\_variable\_set\_id) | A variable set ID to set to all workspaces. Use if you have a pre-existing variable set. | `string` | `null` | no |
+| <a name="input_shared_workspace_tag_names"></a> [shared\_workspace\_tag\_names](#input\_shared\_workspace\_tag\_names) | Tag names to set for all workspaces. To set per-workspace, see `var.workspaces`. | `list(any)` | `[]` | no |
+| <a name="input_vcs_repo"></a> [vcs\_repo](#input\_vcs\_repo) | Definition of the VCS repo to attach to every workspace. | <pre>object({<br>    identifier     = string<br>    oauth_token_id = string<br>    branch         = optional(string)<br>  })</pre> | `null` | no |
 
 ## Outputs
 

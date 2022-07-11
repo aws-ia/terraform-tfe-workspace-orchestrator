@@ -77,7 +77,7 @@ shared_variable_set = {
 
 ## Known Issues
 
-Currently there is no way to trigger a workspace rebuild on creation. If the inital builds fail you can rekick them off. This will hopefully be resolved in a [future release](https://github.com/hashicorp/terraform-provider-tfe/issues/534)
+Currently there is no way to wait for any workspace variable sets prior to the initial workspace creation. If the inital `apply` fails you can rekick them off. This will hopefully be resolved in a [future release](https://github.com/hashicorp/terraform-provider-tfe/issues/534)
 
 ## Requirements
 

@@ -1,5 +1,38 @@
 variable "workspaces" {
   type = any
+  description = <<-EOF
+  Nested map of workspaces to create and the associated arguments they can accept:
+
+  Example:
+    ```terraform
+    workspaces = {
+      eastcoast = {
+        vars = {
+          AWS_REGION = {
+            value = "us-east-1"
+          }
+        }
+      }
+      westcoast = {...}
+    }
+    ```
+
+  Arguments accepted within workspace definition:
+
+  - All arguments from [tfe_workspace](https://registry.terraform.io/providers/hashicorp/tfe/latest/docs/resources/workspace#argument-reference). Defaults set as documented in July 2022 (v0.33.0).
+  - `vars` = A nested map of variables, their value and category
+
+    ```terraform
+    vars = {
+      <var_name> = {
+        value    = <var value>
+        category = "env" # valid values: "env" or "terraform", default = "env"
+      }
+    }
+    ```
+
+  Workspace `tag_names` will attempt to combine specific tag_names and from `var.shared_workspace_tag_names`.
+EOF
 }
 
 variable "shared_variable_set_id" {

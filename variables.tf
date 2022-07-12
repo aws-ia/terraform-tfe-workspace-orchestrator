@@ -24,8 +24,8 @@ variable "workspaces" {
 
     ```
     vars = {
-      <var_name> = {
-        value    = <var value>
+      myvar_name = {
+        value    = "my var value"
         category = "env" # valid values: "env" or "terraform", default = "env"
       }
     }

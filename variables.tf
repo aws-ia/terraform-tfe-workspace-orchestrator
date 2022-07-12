@@ -1,5 +1,5 @@
 variable "workspaces" {
-  type = any
+  type        = any
   description = <<-EOF
   Nested map of workspaces to create and the associated arguments they can accept:
 

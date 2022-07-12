@@ -17,7 +17,7 @@ module "multi_region_deployment" {
   vcs_repo               = var.vcs_repo
   shared_variable_set = {
     test  = { value = 123 } # implicit category = "env"
-    test2 = { value = 123 , category = "terraform"}
+    test2 = { value = 123, category = "terraform" }
   }
 
   workspaces = {

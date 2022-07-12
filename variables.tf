@@ -1,5 +1,5 @@
 variable "workspaces" {
-  type = any
+  type        = any
   description = <<-EOF
   Nested map of workspaces to create and the associated arguments they can accept:
 
@@ -24,8 +24,8 @@ variable "workspaces" {
 
     ```
     vars = {
-      <var_name> = {
-        value    = <var value>
+      myvar_name = {
+        value    = "my var value"
         category = "env" # valid values: "env" or "terraform", default = "env"
       }
     }

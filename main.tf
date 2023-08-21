@@ -9,6 +9,7 @@ resource "tfe_workspace" "main" {
 
   name         = each.key
   organization = var.organization
+  project_id   = try(each.value["project_id"], null)
 
   allow_destroy_plan            = try(each.value["allow_destroy_plan"], null)
   auto_apply                    = try(each.value["auto_apply"], true)

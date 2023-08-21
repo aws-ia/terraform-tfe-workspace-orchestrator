@@ -85,13 +85,13 @@ Currently there is no way to wait for any workspace variable sets prior to the i
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.3.2 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | >=4.0.0, < 6.0.0 |
-| <a name="requirement_tfe"></a> [tfe](#requirement\_tfe) | >= 0.33.0 |
+| <a name="requirement_tfe"></a> [tfe](#requirement\_tfe) | >= 0.44.0 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_tfe"></a> [tfe](#provider\_tfe) | >= 0.33.0 |
+| <a name="provider_tfe"></a> [tfe](#provider\_tfe) | >= 0.44.0 |
 
 ## Modules
 

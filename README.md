@@ -83,15 +83,15 @@ Currently there is no way to wait for any workspace variable sets prior to the i
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.2.2 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 4.0.0, < 5.0.0 |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.3.2 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >=4.0.0, < 6.0.0 |
 | <a name="requirement_tfe"></a> [tfe](#requirement\_tfe) | >= 0.33.0 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_tfe"></a> [tfe](#provider\_tfe) | 0.0.1 |
+| <a name="provider_tfe"></a> [tfe](#provider\_tfe) | >= 0.33.0 |
 
 ## Modules
 
@@ -112,7 +112,7 @@ No modules.
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_organization"></a> [organization](#input\_organization) | n/a | `string` | n/a | yes |
+| <a name="input_organization"></a> [organization](#input\_organization) | TFC Organization | `string` | n/a | yes |
 | <a name="input_workspaces"></a> [workspaces](#input\_workspaces) | Nested map of workspaces to create and the associated arguments they can accept:<br><br>Example:<pre>workspaces = {<br>    eastcoast = {<br>      vars = {<br>        AWS_REGION = {<br>          value = "us-east-1"<br>        }<br>      }<br>    }<br>    westcoast = {...}<br>  }</pre>Arguments accepted within workspace definition:<br><br>- All arguments from [tfe\_workspace](https://registry.terraform.io/providers/hashicorp/tfe/latest/docs/resources/workspace#argument-reference). Defaults set as documented in July 2022 (v0.33.0).<br>- `vars` = A nested map of variables, their value and category<pre>vars = {<br>    myvar_name = {<br>      value    = "my var value"<br>      category = "env" # valid values: "env" or "terraform", default = "env"<br>    }<br>  }</pre>Workspace `tag_names` will attempt to combine specific tag\_names and from `var.shared_workspace_tag_names`. | `any` | n/a | yes |
 | <a name="input_shared_variable_set"></a> [shared\_variable\_set](#input\_shared\_variable\_set) | A variable set ID to create and set to all workspaces. Use if you want to share variables across all workspaces. To set per-workspace, see `var.workspaces`. | `map(map(string))` | `{}` | no |
 | <a name="input_shared_variable_set_id"></a> [shared\_variable\_set\_id](#input\_shared\_variable\_set\_id) | A variable set ID to set to all workspaces. Use if you have a pre-existing variable set. | `string` | `null` | no |

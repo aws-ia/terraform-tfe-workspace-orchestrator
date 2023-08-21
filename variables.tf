@@ -66,5 +66,6 @@ variable "vcs_repo" {
 }
 
 variable "organization" {
-  type = string
+  description = "TFC Organization"
+  type        = string
 }

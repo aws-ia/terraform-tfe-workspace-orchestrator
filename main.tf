@@ -15,7 +15,7 @@ resource "tfe_workspace" "main" {
   auto_apply         = try(each.value["auto_apply"], true)
   description        = try(each.value["description"], null)
   # Set "agent" if agent_pool_id is set
-  execution_mode                = try(each.value["agent_pool_id"] != null ? "agent" : try(each.value["execution_mode"], "remote"))
+  execution_mode                = can(each.value["agent_pool_id"] != null) ? "agent" : try(each.value["execution_mode"], "remote")
   agent_pool_id                 = try(each.value["agent_pool_id"], null)
   file_triggers_enabled         = try(each.value["file_triggers_enabled"], true)
   global_remote_state           = try(each.value["global_remote_state"], null)

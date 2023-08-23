@@ -1,6 +1,7 @@
 locals {
   individual_workspace_vars_map = { for w, value in var.workspaces : w => value.vars if try(value.vars, {}) != {} }
   individual_workspace_vars     = flatten([for workspace, variables in local.individual_workspace_vars_map : [for variable in keys(variables) : "${workspace}/${variable}"]])
+  # shared_variable_sets_per_workspace = { for w, value in var.workspaces : w => value.vars if try(value.vars, {}) != {} }
 }
 
 resource "tfe_workspace" "main" {
@@ -13,7 +14,7 @@ resource "tfe_workspace" "main" {
   allow_destroy_plan = try(each.value["allow_destroy_plan"], null)
   auto_apply         = try(each.value["auto_apply"], true)
   description        = try(each.value["description"], null)
-  # Set "agent" if agent_pool_id is set
+  # Set to "agent" if agent_pool_id is set
   execution_mode                = can(each.value["agent_pool_id"] != null) ? "agent" : try(each.value["execution_mode"], "remote")
   agent_pool_id                 = try(each.value["agent_pool_id"], null)
   file_triggers_enabled         = try(each.value["file_triggers_enabled"], true)
@@ -41,10 +42,13 @@ resource "tfe_workspace" "main" {
 
 # attach pre-existing variable set to workspaces
 resource "tfe_workspace_variable_set" "shared_preexisting_variable_set_ids" {
-  for_each = var.shared_variable_set_id == null ? {} : tfe_workspace.main
+  for_each = toset(length(var.shared_variable_set_ids) == 0 ?
+    [] :
+    [for w, value in var.workspaces : [for vsid in var.shared_variable_set_ids : "${w}/${vsid}"]]
+  )
 
-  variable_set_id = var.shared_variable_set_id
-  workspace_id    = each.value.id
+  variable_set_id = split("/", each.key)[1]
+  workspace_id    = tfe_workspace.main[split("/", each.key)[0]].id
 }
 
 resource "tfe_variable" "workspace" {

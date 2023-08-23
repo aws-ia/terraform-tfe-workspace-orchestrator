@@ -35,10 +35,10 @@ variable "workspaces" {
 EOF
 }
 
-variable "shared_variable_set_id" {
+variable "shared_variable_set_ids" {
   description = "A variable set ID to set to all workspaces. Use if you have a pre-existing variable set."
-  type        = string
-  default     = null
+  type        = list(string)
+  default     = []
 }
 
 # variable "shared_variable_set" {

@@ -41,11 +41,11 @@ variable "shared_variable_set_id" {
   default     = null
 }
 
-variable "shared_variable_set" {
-  description = "A variable set ID to create and set to all workspaces. Use if you want to share variables across all workspaces. To set per-workspace, see `var.workspaces`."
-  type        = map(map(string))
-  default     = {}
-}
+# variable "shared_variable_set" {
+#   description = "A map of variables to create and set to all workspaces. Use if you want to share variables across all workspaces. To set per-workspace, see `var.workspaces`."
+#   type        = map(string)
+#   default     = {}
+# }
 
 variable "shared_workspace_tag_names" {
   description = "Tag names to set for all workspaces. To set per-workspace, see `var.workspaces`."

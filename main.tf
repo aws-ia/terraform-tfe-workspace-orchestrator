@@ -12,7 +12,7 @@ resource "tfe_workspace" "main" {
   project_id   = try(each.value["project_id"], null)
 
   allow_destroy_plan  = try(each.value["allow_destroy_plan"], null)
-  assessments_enabled = try(each.value["assessments_enabled"], true)
+  assessments_enabled = try(each.value["assessments_enabled"], false) # drift detection
   auto_apply          = try(each.value["auto_apply"], true)
   description         = try(each.value["description"], null)
   # Set to "agent" if agent_pool_id is set

@@ -11,9 +11,10 @@ resource "tfe_workspace" "main" {
   organization = var.organization
   project_id   = try(each.value["project_id"], null)
 
-  allow_destroy_plan = try(each.value["allow_destroy_plan"], null)
-  auto_apply         = try(each.value["auto_apply"], true)
-  description        = try(each.value["description"], null)
+  allow_destroy_plan  = try(each.value["allow_destroy_plan"], null)
+  assessments_enabled = try(each.value["assessments_enabled"], true)
+  auto_apply          = try(each.value["auto_apply"], true)
+  description         = try(each.value["description"], null)
   # Set to "agent" if agent_pool_id is set
   execution_mode                = can(each.value["agent_pool_id"] != null) ? "agent" : try(each.value["execution_mode"], "remote")
   agent_pool_id                 = try(each.value["agent_pool_id"], null)

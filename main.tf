@@ -45,7 +45,7 @@ resource "tfe_workspace" "main" {
 resource "tfe_workspace_variable_set" "shared_preexisting_variable_set_ids" {
   for_each = toset(length(var.shared_variable_set_ids) == 0 ?
     [] :
-    [for w, value in var.workspaces : [for vsid in var.shared_variable_set_ids : "${w}/${vsid}"]]
+    flatten([for w, value in var.workspaces : [for vsid in var.shared_variable_set_ids : "${w}/${vsid}"]])
   )
 
   variable_set_id = split("/", each.key)[1]

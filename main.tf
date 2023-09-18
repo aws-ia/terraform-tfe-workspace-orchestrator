@@ -57,9 +57,9 @@ resource "tfe_variable" "workspace" {
 
   workspace_id = tfe_workspace.main[split("/", each.key)[0]].id
 
-  category = try(var.workspaces[split("/", each.key)[0]].vars[split("/", each.key)[1]].category, "env")
-  key      = split("/", each.key)[1]
-  value    = var.workspaces[split("/", each.key)[0]].vars[split("/", each.key)[1]].value
+  category    = try(var.workspaces[split("/", each.key)[0]].vars[split("/", each.key)[1]].category, "env")
+  key         = split("/", each.key)[1]
+  value       = var.workspaces[split("/", each.key)[0]].vars[split("/", each.key)[1]].value
   description = try(var.workspaces[split("/", each.key)[0]].vars[split("/", each.key)[1]].description, null)
 }
 

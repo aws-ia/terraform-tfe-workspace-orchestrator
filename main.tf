@@ -60,6 +60,7 @@ resource "tfe_variable" "workspace" {
   category = try(var.workspaces[split("/", each.key)[0]].vars[split("/", each.key)[1]].category, "env")
   key      = split("/", each.key)[1]
   value    = var.workspaces[split("/", each.key)[0]].vars[split("/", each.key)[1]].value
+  description = try(var.workspaces[split("/", each.key)[0]].vars[split("/", each.key)[1]].description, null)
 }
 
 # # create variable set for workspaces that specify their own variables

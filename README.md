@@ -117,5 +117,7 @@ No modules.
 
 ## Outputs
 
-No outputs.
+| Name | Description |
+|------|-------------|
+| <a name="output_workspace_attributes"></a> [workspace\_attributes](#output\_workspace\_attributes) | Attributes associated with the created workspaces. |
 <!-- END_TF_DOCS -->

@@ -1,4 +1,4 @@
-output "workspace_attributes" {
+output "workspaces_attributes" {
   description = "Attributes associated with the created workspaces."
-  value       = tfe_variable.workspace
+  value       = tfe_workspace.main
 }

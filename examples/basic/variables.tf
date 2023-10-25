@@ -1,9 +1,9 @@
-variable "workspace_name" {
-  default = {
-    value    = "test"
-    category = "terraform"
-  }
-}
+# variable "workspace_name" {
+#   default = {
+#     value    = "test"
+#     category = "terraform"
+#   }
+# }
 
 variable "vcs_repo" {
   description = "Definition of the VCS repo to attach to every workspace."
@@ -17,5 +17,5 @@ variable "vcs_repo" {
 }
 
 variable "organization" {}
-variable "creds_variable_set_name" {}
-variable "shared_variable_set" {}
+# variable "creds_variable_set_name" {}
+# variable "shared_variable_set" {}

@@ -1,7 +1,7 @@
 locals {
   individual_workspace_vars_map = { for w, value in var.workspaces : w => value.vars if try(value.vars, {}) != {} }
-  individual_workspace_vars     = flatten([for workspace, tags in local.individual_workspace_vars_map : [for tag in keys(tags) : "${workspace}/${tag}"]])
-  workspace_ids                 = [for workspace in tfe_workspace.main : workspace.id]
+  individual_workspace_vars     = flatten([for workspace, variables in local.individual_workspace_vars_map : [for variable in keys(variables) : "${workspace}/${variable}"]])
+  # shared_variable_sets_per_workspace = { for w, value in var.workspaces : w => value.vars if try(value.vars, {}) != {} }
 }
 
 resource "tfe_workspace" "main" {
@@ -9,11 +9,15 @@ resource "tfe_workspace" "main" {
 
   name         = each.key
   organization = var.organization
+  project_id   = try(each.value["project_id"], null)
 
-  allow_destroy_plan            = try(each.value["allow_destroy_plan"], null)
-  auto_apply                    = try(each.value["auto_apply"], true)
-  description                   = try(each.value["description"], null)
-  execution_mode                = try(each.value["execution_mode"], "remote")
+  allow_destroy_plan  = try(each.value["allow_destroy_plan"], null)
+  assessments_enabled = try(each.value["assessments_enabled"], false) # drift detection
+  auto_apply          = try(each.value["auto_apply"], true)
+  description         = try(each.value["description"], null)
+  # Set to "agent" if agent_pool_id is set
+  execution_mode                = can(each.value["agent_pool_id"] != null) ? "agent" : try(each.value["execution_mode"], "remote")
+  agent_pool_id                 = try(each.value["agent_pool_id"], null)
   file_triggers_enabled         = try(each.value["file_triggers_enabled"], true)
   global_remote_state           = try(each.value["global_remote_state"], null)
   remote_state_consumer_ids     = try(each.value["remote_state_consumer_ids"], null)
@@ -39,48 +43,53 @@ resource "tfe_workspace" "main" {
 
 # attach pre-existing variable set to workspaces
 resource "tfe_workspace_variable_set" "shared_preexisting_variable_set_ids" {
-  for_each = var.shared_variable_set_id == null ? {} : tfe_workspace.main
+  for_each = toset(length(var.shared_variable_set_ids) == 0 ?
+    [] :
+    flatten([for w, value in var.workspaces : [for vsid in var.shared_variable_set_ids : "${w}/${vsid}"]])
+  )
 
-  variable_set_id = var.shared_variable_set_id
-  workspace_id    = each.value.id
+  variable_set_id = split("/", each.key)[1]
+  workspace_id    = tfe_workspace.main[split("/", each.key)[0]].id
 }
 
-# create variable set for workspaces that specify their own variables
-resource "tfe_variable_set" "per_workspace" {
-  for_each = local.individual_workspace_vars_map
-
-  name          = each.key
-  description   = each.key
-  organization  = var.organization
-  workspace_ids = local.workspace_ids
-}
-
-# create variables specified by each workspace in var.workspaces.*.vars
-resource "tfe_variable" "per_workspace" {
+resource "tfe_variable" "workspace" {
   for_each = toset(local.individual_workspace_vars)
 
-  variable_set_id = tfe_variable_set.per_workspace[split("/", each.key)[0]].id
+  workspace_id = tfe_workspace.main[split("/", each.key)[0]].id
 
-  category = try(var.workspaces[split("/", each.key)[0]].vars[split("/", each.key)[1]].category, "env")
-  key      = split("/", each.key)[1]
-  value    = var.workspaces[split("/", each.key)[0]].vars[split("/", each.key)[1]].value
+  category    = try(var.workspaces[split("/", each.key)[0]].vars[split("/", each.key)[1]].category, "env")
+  key         = split("/", each.key)[1]
+  value       = var.workspaces[split("/", each.key)[0]].vars[split("/", each.key)[1]].value
+  description = try(var.workspaces[split("/", each.key)[0]].vars[split("/", each.key)[1]].description, null)
 }
+
+# # create variable set for workspaces that specify their own variables
+# resource "tfe_variable_set" "per_workspace" {
+#   count = var.shared_variable_set == {} ? 0 : 1
+
+#   name          = var.shared_variable_set
+#   description   = each.key
+#   organization  = var.organization
+#   workspace_ids = local.workspace_ids
+# }
+
+# create variables specified by each workspace in var.workspaces.*.vars
 
 # create variable set for workspaces that specify their own variables
-resource "tfe_variable_set" "shared_to_all_workspaces" {
-  count = var.shared_variable_set == {} ? 0 : 1
+# resource "tfe_variable_set" "shared_to_all_workspaces" {
+#   count = var.shared_variable_set == {} ? 0 : 1
 
-  name          = "shared-to-all-workspaces"
-  description   = "shared-to-all-workspaces"
-  organization  = var.organization
-  workspace_ids = local.workspace_ids
-}
+#   name          = "shared-to-all-workspaces"
+#   description   = "shared-to-all-workspaces"
+#   organization  = var.organization
+#   workspace_ids = local.workspace_ids
+# }
 
-resource "tfe_variable" "shared_to_all_workspaces" {
-  for_each = var.shared_variable_set
+# resource "tfe_variable" "shared_to_all_workspaces" {
+#   for_each = var.shared_variable_set
 
-  variable_set_id = tfe_variable_set.shared_to_all_workspaces[0].id
-  key             = each.key
-  value           = each.value.value
-  category        = try(each.value.category, "env")
-}
+#   variable_set_id = tfe_variable_set.shared_to_all_workspaces[0].id
+#   key             = each.key
+#   value           = each.value.value
+#   category        = try(each.value.category, "env")
+# }

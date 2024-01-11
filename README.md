@@ -82,13 +82,13 @@ Currently there is no way to wait for any workspace variable sets prior to the i
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.3.2 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | >=4.0.0, < 6.0.0 |
-| <a name="requirement_tfe"></a> [tfe](#requirement\_tfe) | >= 0.44.0 |
+| <a name="requirement_tfe"></a> [tfe](#requirement\_tfe) | >= 0.51.1 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_tfe"></a> [tfe](#provider\_tfe) | 0.48.0 |
+| <a name="provider_tfe"></a> [tfe](#provider\_tfe) | >= 0.51.1 |
 
 ## Modules
 
@@ -110,7 +110,7 @@ No modules.
 | <a name="input_workspaces"></a> [workspaces](#input\_workspaces) | Nested map of workspaces to create and the associated arguments they can accept:<br><br>Example:<pre>workspaces = {<br>    eastcoast = {<br>      vars = {<br>        AWS_REGION = {<br>          value = "us-east-1"<br>        }<br>      }<br>    }<br>    westcoast = {...}<br>  }</pre>Arguments accepted within workspace definition:<br><br>- All arguments from [tfe\_workspace](https://registry.terraform.io/providers/hashicorp/tfe/latest/docs/resources/workspace#argument-reference). Defaults set as documented in July 2022 (v0.33.0).<br>- `vars` = A nested map of variables, their value and category<pre>vars = {<br>    myvar_name = {<br>      value    = "my var value"<br>      category = "env" # valid values: "env" or "terraform", default = "env"<br>    }<br>  }</pre>Workspace `tag_names` will attempt to combine specific tag\_names and from `var.shared_workspace_tag_names`. | `any` | n/a | yes |
 | <a name="input_shared_variable_set_ids"></a> [shared\_variable\_set\_ids](#input\_shared\_variable\_set\_ids) | A variable set ID to set to all workspaces. Use if you have a pre-existing variable set. | `list(string)` | `[]` | no |
 | <a name="input_shared_workspace_tag_names"></a> [shared\_workspace\_tag\_names](#input\_shared\_workspace\_tag\_names) | Tag names to set for all workspaces. To set per-workspace, see `var.workspaces`. | `list(any)` | `[]` | no |
-| <a name="input_vcs_repo"></a> [vcs\_repo](#input\_vcs\_repo) | Definition of the VCS repo to attach to every workspace. | <pre>object({<br>    identifier     = string<br>    oauth_token_id = string<br>    branch         = optional(string)<br>  })</pre> | `null` | no |
+| <a name="input_vcs_repo"></a> [vcs\_repo](#input\_vcs\_repo) | Definition of the VCS repo to attach to every workspace. | <pre>object({<br>    branch                     = optional(string)<br>    github_app_installation_id = optional(string)<br>    identifier                 = string<br>    ingress_submodules         = optional(bool)<br>    oauth_token_id             = optional(string)<br>  })</pre> | `null` | no |
 
 ## Outputs
 

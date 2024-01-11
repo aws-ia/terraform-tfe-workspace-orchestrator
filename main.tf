@@ -1,6 +1,7 @@
 locals {
-  individual_workspace_vars_map = { for w, value in var.workspaces : w => value.vars if try(value.vars, {}) != {} }
-  individual_workspace_vars     = flatten([for workspace, variables in local.individual_workspace_vars_map : [for variable in keys(variables) : "${workspace}/${variable}"]])
+  individual_workspace_vars_map               = { for w, value in var.workspaces : w => value.vars if try(value.vars, {}) != {} }
+  individual_workspace_vars                   = flatten([for workspace, variables in local.individual_workspace_vars_map : [for variable in keys(variables) : "${workspace}/${variable}"]])
+  individual_workspace_vcs_repo_arguments_map = { for r, value in var.workspaces : r => value.vcs_repo if try(value.vcs_repo, {}) != {} }
   # shared_variable_sets_per_workspace = { for w, value in var.workspaces : w => value.vars if try(value.vars, {}) != {} }
 }
 
@@ -31,12 +32,14 @@ resource "tfe_workspace" "main" {
   tag_names                     = concat(var.shared_workspace_tag_names, try(each.value["tag_names"], []))
 
   dynamic "vcs_repo" {
-    for_each = var.vcs_repo == null ? [] : ["true"]
+    for_each = try(each.value.vcs_repo_override, false) || (try(each.value.vcs_repo_override, false) && try(each.value.vcs_repo_enable, false)) ? [true] : []
 
     content {
-      identifier     = var.vcs_repo["identifier"]
-      oauth_token_id = var.vcs_repo["oauth_token_id"]
-      branch         = try(var.vcs_repo["branch"], "main")
+      branch                     = each.value.vcs_repo_override == true ? try(local.individual_workspace_vcs_repo_arguments_map[each.key].branch, "main") : try(var.vcs_repo.branch, "main")
+      github_app_installation_id = each.value.vcs_repo_override == true ? try(local.individual_workspace_vcs_repo_arguments_map[each.key].github_app_installation_id, null) : try(var.vcs_repo.github_app_installation_id, null)
+      identifier                 = each.value.vcs_repo_override == true ? try(local.individual_workspace_vcs_repo_arguments_map[each.key].identifier, null) : var.vcs_repo.identifier
+      ingress_submodules         = each.value.vcs_repo_override == true ? try(local.individual_workspace_vcs_repo_arguments_map[each.key].ingress_submodules, null) : try(var.vcs_repo.ingress_submodules, null)
+      oauth_token_id             = each.value.vcs_repo_override == true ? try(local.individual_workspace_vcs_repo_arguments_map[each.key].oauth_token_id, null) : try(var.vcs_repo.oauth_token_id, null)
     }
   }
 }

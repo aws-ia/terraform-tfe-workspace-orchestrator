@@ -35,7 +35,7 @@ resource "tfe_workspace" "main" {
     for_each = try(each.value.vcs_repo_override, false) || (try(each.value.vcs_repo_override, false) && try(each.value.vcs_repo_enable, false)) ? [true] : []
 
     content {
-      branch                     = each.value.vcs_repo_override == true ? try(local.individual_workspace_vcs_repo_arguments_map[each.key].branch, "main") : try(var.vcs_repo.branch, "main")
+      branch                     = each.value.vcs_repo_override == true ? try(local.individual_workspace_vcs_repo_arguments_map[each.key].branch, null) : try(var.vcs_repo.branch, null)
       github_app_installation_id = each.value.vcs_repo_override == true ? try(local.individual_workspace_vcs_repo_arguments_map[each.key].github_app_installation_id, null) : try(var.vcs_repo.github_app_installation_id, null)
       identifier                 = each.value.vcs_repo_override == true ? try(local.individual_workspace_vcs_repo_arguments_map[each.key].identifier, null) : var.vcs_repo.identifier
       ingress_submodules         = each.value.vcs_repo_override == true ? try(local.individual_workspace_vcs_repo_arguments_map[each.key].ingress_submodules, null) : try(var.vcs_repo.ingress_submodules, null)

@@ -27,6 +27,7 @@ resource "tfe_workspace" "main" {
   structured_run_output_enabled = try(each.value["structured_run_output_enabled"], true)
   ssh_key_id                    = try(each.value["ssh_key_id"], null)
   terraform_version             = try(each.value["terraform_version"], null)
+  trigger_patterns              = try(each.value["trigger_patterns"], null)
   trigger_prefixes              = try(each.value["trigger_prefixes"], null)
   working_directory             = try(each.value["working_directory"], null)
   tag_names                     = concat(var.shared_workspace_tag_names, try(each.value["tag_names"], []))

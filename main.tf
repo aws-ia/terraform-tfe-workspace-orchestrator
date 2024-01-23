@@ -12,13 +12,10 @@ resource "tfe_workspace" "main" {
   organization = var.organization
   project_id   = try(each.value["project_id"], null)
 
-  allow_destroy_plan  = try(each.value["allow_destroy_plan"], null)
-  assessments_enabled = try(each.value["assessments_enabled"], false) # drift detection
-  auto_apply          = try(each.value["auto_apply"], true)
-  description         = try(each.value["description"], null)
-  # Set to "agent" if agent_pool_id is set
-  execution_mode                = can(each.value["agent_pool_id"] != null) ? "agent" : try(each.value["execution_mode"], "remote")
-  agent_pool_id                 = try(each.value["agent_pool_id"], null)
+  allow_destroy_plan            = try(each.value["allow_destroy_plan"], null)
+  assessments_enabled           = try(each.value["assessments_enabled"], false) # drift detection
+  auto_apply                    = try(each.value["auto_apply"], true)
+  description                   = try(each.value["description"], null)
   file_triggers_enabled         = try(each.value["file_triggers_enabled"], true)
   global_remote_state           = try(each.value["global_remote_state"], null)
   remote_state_consumer_ids     = try(each.value["remote_state_consumer_ids"], null)
@@ -65,6 +62,14 @@ resource "tfe_variable" "workspace" {
   key         = split("/", each.key)[1]
   value       = var.workspaces[split("/", each.key)[0]].vars[split("/", each.key)[1]].value
   description = try(var.workspaces[split("/", each.key)[0]].vars[split("/", each.key)[1]].description, null)
+}
+
+resource "tfe_workspace_settings" "this" {
+  for_each = var.workspaces
+
+  workspace_id   = tfe_workspace.main[each.key].id
+  execution_mode = can(each.value["agent_pool_id"] != null) ? "agent" : try(each.value["execution_mode"], "remote")
+  agent_pool_id  = can(each.value["agent_pool_id"] != null) ? each.value["agent_pool_id"] : null
 }
 
 # # create variable set for workspaces that specify their own variables

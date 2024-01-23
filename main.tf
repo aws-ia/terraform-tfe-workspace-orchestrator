@@ -30,8 +30,7 @@ resource "tfe_workspace" "main" {
   tag_names                     = concat(var.shared_workspace_tag_names, try(each.value["tag_names"], []))
 
   dynamic "vcs_repo" {
-    for_each = try(each.value.vcs_repo_enable, false) && ((try(var.vcs_repo, null) != null) || (try(each.value.vcs_repo, null) != null)) ? [true] : []
-
+    for_each = ((try(var.vcs_repo, null) != null) && try(each.value.vcs_repo_enable, true)) ? [true] : []
     content {
       branch                     = (try(each.value.vcs_repo_enable, false) && can(each.value.vcs_repo != null)) ? try(local.individual_workspace_vcs_repo_arguments_map[each.key].branch, null) : try(var.vcs_repo.branch, null)
       github_app_installation_id = (try(each.value.vcs_repo_enable, false) && can(each.value.vcs_repo != null)) ? try(local.individual_workspace_vcs_repo_arguments_map[each.key].github_app_installation_id, null) : try(var.vcs_repo.github_app_installation_id, null)

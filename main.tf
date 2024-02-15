@@ -2,6 +2,8 @@ locals {
   individual_workspace_vars_map               = { for w, value in var.workspaces : w => value.vars if try(value.vars, {}) != {} }
   individual_workspace_vars                   = flatten([for workspace, variables in local.individual_workspace_vars_map : [for variable in keys(variables) : "${workspace}/${variable}"]])
   individual_workspace_vcs_repo_arguments_map = { for r, value in var.workspaces : r => value.vcs_repo if try(value.vcs_repo, {}) != {} }
+  individual_workspace_vsids_map              = { for v, value in var.workspaces : v => value.variable_set_ids if try(value.variable_set_ids, {}) != {} }
+  individual_workspace_vsids                  = flatten([for workspace, vsids in local.individual_workspace_vsids_map : [for vsid in vsids : "${workspace}/${vsid}"]])
   # shared_variable_sets_per_workspace = { for w, value in var.workspaces : w => value.vars if try(value.vars, {}) != {} }
 }
 
@@ -69,6 +71,13 @@ resource "tfe_workspace_settings" "this" {
   workspace_id   = tfe_workspace.main[each.key].id
   execution_mode = can(each.value["agent_pool_id"] != null) ? "agent" : try(each.value["execution_mode"], "remote")
   agent_pool_id  = can(each.value["agent_pool_id"] != null) ? each.value["agent_pool_id"] : null
+}
+
+resource "tfe_workspace_variable_set" "this" {
+  for_each = toset(local.individual_workspace_vsids)
+
+  workspace_id    = tfe_workspace.main[split("/", each.key)[0]].id
+  variable_set_id = split("/", each.key)[1]
 }
 
 # # create variable set for workspaces that specify their own variables

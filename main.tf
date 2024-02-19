@@ -1,6 +1,9 @@
 locals {
-  individual_workspace_vars_map = { for w, value in var.workspaces : w => value.vars if try(value.vars, {}) != {} }
-  individual_workspace_vars     = flatten([for workspace, variables in local.individual_workspace_vars_map : [for variable in keys(variables) : "${workspace}/${variable}"]])
+  individual_workspace_vars_map               = { for w, value in var.workspaces : w => value.vars if try(value.vars, {}) != {} }
+  individual_workspace_vars                   = flatten([for workspace, variables in local.individual_workspace_vars_map : [for variable in keys(variables) : "${workspace}/${variable}"]])
+  individual_workspace_vcs_repo_arguments_map = { for r, value in var.workspaces : r => value.vcs_repo if try(value.vcs_repo, {}) != {} }
+  individual_workspace_vsids_map              = { for v, value in var.workspaces : v => value.variable_set_ids if try(value.variable_set_ids, {}) != {} }
+  individual_workspace_vsids                  = flatten([for workspace, vsids in local.individual_workspace_vsids_map : [for vsid in vsids : "${workspace}/${vsid}"]])
   # shared_variable_sets_per_workspace = { for w, value in var.workspaces : w => value.vars if try(value.vars, {}) != {} }
 }
 
@@ -11,13 +14,10 @@ resource "tfe_workspace" "main" {
   organization = var.organization
   project_id   = try(each.value["project_id"], null)
 
-  allow_destroy_plan  = try(each.value["allow_destroy_plan"], null)
-  assessments_enabled = try(each.value["assessments_enabled"], false) # drift detection
-  auto_apply          = try(each.value["auto_apply"], true)
-  description         = try(each.value["description"], null)
-  # Set to "agent" if agent_pool_id is set
-  execution_mode                = can(each.value["agent_pool_id"] != null) ? "agent" : try(each.value["execution_mode"], "remote")
-  agent_pool_id                 = try(each.value["agent_pool_id"], null)
+  allow_destroy_plan            = try(each.value["allow_destroy_plan"], null)
+  assessments_enabled           = try(each.value["assessments_enabled"], false) # drift detection
+  auto_apply                    = try(each.value["auto_apply"], true)
+  description                   = try(each.value["description"], null)
   file_triggers_enabled         = try(each.value["file_triggers_enabled"], true)
   global_remote_state           = try(each.value["global_remote_state"], null)
   remote_state_consumer_ids     = try(each.value["remote_state_consumer_ids"], null)
@@ -26,17 +26,19 @@ resource "tfe_workspace" "main" {
   structured_run_output_enabled = try(each.value["structured_run_output_enabled"], true)
   ssh_key_id                    = try(each.value["ssh_key_id"], null)
   terraform_version             = try(each.value["terraform_version"], null)
+  trigger_patterns              = try(each.value["trigger_patterns"], null)
   trigger_prefixes              = try(each.value["trigger_prefixes"], null)
   working_directory             = try(each.value["working_directory"], null)
   tag_names                     = concat(var.shared_workspace_tag_names, try(each.value["tag_names"], []))
 
   dynamic "vcs_repo" {
-    for_each = var.vcs_repo == null ? [] : ["true"]
-
+    for_each = ((try(var.vcs_repo, null) != null) && try(each.value.vcs_repo_enable, true)) ? [true] : []
     content {
-      identifier     = var.vcs_repo["identifier"]
-      oauth_token_id = var.vcs_repo["oauth_token_id"]
-      branch         = try(var.vcs_repo["branch"], "main")
+      branch                     = (try(each.value.vcs_repo_enable, false) && can(each.value.vcs_repo != null)) ? try(local.individual_workspace_vcs_repo_arguments_map[each.key].branch, null) : try(var.vcs_repo.branch, null)
+      github_app_installation_id = (try(each.value.vcs_repo_enable, false) && can(each.value.vcs_repo != null)) ? try(local.individual_workspace_vcs_repo_arguments_map[each.key].github_app_installation_id, null) : try(var.vcs_repo.github_app_installation_id, null)
+      identifier                 = (try(each.value.vcs_repo_enable, false) && can(each.value.vcs_repo != null)) ? try(local.individual_workspace_vcs_repo_arguments_map[each.key].identifier, null) : var.vcs_repo.identifier
+      ingress_submodules         = (try(each.value.vcs_repo_enable, false) && can(each.value.vcs_repo != null)) ? try(local.individual_workspace_vcs_repo_arguments_map[each.key].ingress_submodules, null) : try(var.vcs_repo.ingress_submodules, null)
+      oauth_token_id             = (try(each.value.vcs_repo_enable, false) && can(each.value.vcs_repo != null)) ? try(local.individual_workspace_vcs_repo_arguments_map[each.key].oauth_token_id, null) : try(var.vcs_repo.oauth_token_id, null)
     }
   }
 }
@@ -61,6 +63,21 @@ resource "tfe_variable" "workspace" {
   key         = split("/", each.key)[1]
   value       = var.workspaces[split("/", each.key)[0]].vars[split("/", each.key)[1]].value
   description = try(var.workspaces[split("/", each.key)[0]].vars[split("/", each.key)[1]].description, null)
+}
+
+resource "tfe_workspace_settings" "this" {
+  for_each = var.workspaces
+
+  workspace_id   = tfe_workspace.main[each.key].id
+  execution_mode = can(each.value["agent_pool_id"] != null) ? "agent" : try(each.value["execution_mode"], "remote")
+  agent_pool_id  = can(each.value["agent_pool_id"] != null) ? each.value["agent_pool_id"] : null
+}
+
+resource "tfe_workspace_variable_set" "this" {
+  for_each = toset(local.individual_workspace_vsids)
+
+  workspace_id    = tfe_workspace.main[split("/", each.key)[0]].id
+  variable_set_id = split("/", each.key)[1]
 }
 
 # # create variable set for workspaces that specify their own variables

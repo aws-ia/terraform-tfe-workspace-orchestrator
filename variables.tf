@@ -59,9 +59,11 @@ variable "vcs_repo" {
   default     = null
 
   type = object({
-    identifier     = string
-    oauth_token_id = string
-    branch         = optional(string)
+    branch                     = optional(string)
+    github_app_installation_id = optional(string)
+    identifier                 = string
+    ingress_submodules         = optional(bool)
+    oauth_token_id             = optional(string)
   })
 }
 

@@ -1,4 +1,10 @@
 <!-- BEGIN_TF_DOCS -->
+This example shows how to change default VCS setting behavior
+By default, if `vcs_repo` variable is set, VCS is enabled across all the workspaces
+In case if it needs to be customized, there are two options:
+ - set `vcs_repo_enable` to `false` to not enable VCS at all
+ - set `vcs_repo` within particular workspace to enable VCS with custom settings (e.g. repository, branch, token etc.)
+
 ## Requirements
 
 | Name | Version |

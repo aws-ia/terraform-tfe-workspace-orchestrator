@@ -100,8 +100,10 @@ No modules.
 | [tfe_variable.workspace](https://registry.terraform.io/providers/hashicorp/tfe/latest/docs/resources/variable) | resource |
 | [tfe_workspace.main](https://registry.terraform.io/providers/hashicorp/tfe/latest/docs/resources/workspace) | resource |
 | [tfe_workspace_settings.this](https://registry.terraform.io/providers/hashicorp/tfe/latest/docs/resources/workspace_settings) | resource |
+| [tfe_workspace_variable_set.shared_named_variable_sets](https://registry.terraform.io/providers/hashicorp/tfe/latest/docs/resources/workspace_variable_set) | resource |
 | [tfe_workspace_variable_set.shared_preexisting_variable_set_ids](https://registry.terraform.io/providers/hashicorp/tfe/latest/docs/resources/workspace_variable_set) | resource |
 | [tfe_workspace_variable_set.this](https://registry.terraform.io/providers/hashicorp/tfe/latest/docs/resources/workspace_variable_set) | resource |
+| [tfe_variable_set.shared_variable_sets](https://registry.terraform.io/providers/hashicorp/tfe/latest/docs/data-sources/variable_set) | data source |
 
 ## Inputs
 
@@ -110,6 +112,7 @@ No modules.
 | <a name="input_organization"></a> [organization](#input\_organization) | TFC Organization | `string` | n/a | yes |
 | <a name="input_workspaces"></a> [workspaces](#input\_workspaces) | Nested map of workspaces to create and the associated arguments they can accept:<br/><br/>Example:<pre>workspaces = {<br/>    eastcoast = {<br/>      vars = {<br/>        AWS_REGION = {<br/>          value = "us-east-1"<br/>        }<br/>      }<br/>    }<br/>    westcoast = {...}<br/>  }</pre>Arguments accepted within workspace definition:<br/><br/>- All arguments from [tfe\_workspace](https://registry.terraform.io/providers/hashicorp/tfe/latest/docs/resources/workspace#argument-reference). Defaults set as documented in July 2022 (v0.33.0).<br/>- `vars` = A nested map of variables, their value and category<pre>vars = {<br/>    myvar_name = {<br/>      value    = "my var value"<br/>      category = "env" # valid values: "env" or "terraform", default = "env"<br/>    }<br/>  }</pre>Workspace `tag_names` will attempt to combine specific tag\_names and from `var.shared_workspace_tag_names`. | `any` | n/a | yes |
 | <a name="input_shared_variable_set_ids"></a> [shared\_variable\_set\_ids](#input\_shared\_variable\_set\_ids) | A variable set ID to set to all workspaces. Use if you have a pre-existing variable set. | `list(string)` | `[]` | no |
+| <a name="input_shared_variable_sets"></a> [shared\_variable\_sets](#input\_shared\_variable\_sets) | A list of variable sets to apply to each workspace. These must be pre-existing or the module must explicitly depend on them. | `list(string)` | `[]` | no |
 | <a name="input_shared_workspace_tag_names"></a> [shared\_workspace\_tag\_names](#input\_shared\_workspace\_tag\_names) | Tag names to set for all workspaces. To set per-workspace, see `var.workspaces`. | `list(any)` | `[]` | no |
 | <a name="input_vcs_repo"></a> [vcs\_repo](#input\_vcs\_repo) | Definition of the VCS repo to attach to every workspace. | <pre>object({<br/>    branch                     = optional(string)<br/>    github_app_installation_id = optional(string)<br/>    identifier                 = string<br/>    ingress_submodules         = optional(bool)<br/>    oauth_token_id             = optional(string)<br/>  })</pre> | `null` | no |
 

@@ -23,7 +23,7 @@ It can also accept `var.workspaces.<>.vars` which can accept variable declaratio
 
 This module allows you to specify variables in 3 different ways:
 
-1. Attach a pre-created [variable set id](https://www.terraform.io/cloud-docs/api-docs/variable-sets) to each workspace with the key `shared_variable_set_ids`.
+1. Attach a pre-created [variable set](https://www.terraform.io/cloud-docs/api-docs/variable-sets) to each workspace with the key `shared_variable_sets` (must exist prior to apply or be explicitly `depends_on`).
 1. Specify on a per-workspace using the nested map structure below
 
 ```terraform
@@ -31,8 +31,8 @@ module "multi_region_deployment" {
   source = "aws-ia/workspace-orchestrator/tfe"
   ...
 
-  shared_variable_set_ids = [
-    data.tfe_variable_set.creds.id,
+  shared_variable_sets = [
+    "my-variable-set"
   ]
 
   workspaces = {
@@ -72,10 +72,6 @@ vcs_repo = {
 }
 ```
 
-## Known Issues
-
-Currently there is no way to wait for any workspace variable sets prior to the initial workspace creation. If the inital `apply` fails you can rekick them off. This will hopefully be resolved in a [future release](https://github.com/hashicorp/terraform-provider-tfe/issues/534)
-
 ## Requirements
 
 | Name | Version |
@@ -87,7 +83,7 @@ Currently there is no way to wait for any workspace variable sets prior to the i
 
 | Name | Version |
 |------|---------|
-| <a name="provider_tfe"></a> [tfe](#provider\_tfe) | >= 0.60.0 |
+| <a name="provider_tfe"></a> [tfe](#provider\_tfe) | 0.64.0 |
 
 ## Modules
 

@@ -54,6 +54,17 @@ resource "tfe_workspace_variable_set" "shared_preexisting_variable_set_ids" {
   workspace_id    = tfe_workspace.main[split("/", each.key)[0]].id
 }
 
+resource "tfe_workspace_variable_set" "shared_preexisting_variable_set_named" {
+  for_each = toset(length(var.shared_variable_set_named) == 0 ?
+    [] :
+    flatten([for w, value in var.workspaces : [for k,v in var.shared_variable_set_named : "${w}/${k}"]])
+  )
+
+  variable_set_id = var.shared_variable_set_named[split("/", each.key)[1]]
+  workspace_id    = tfe_workspace.main[split("/", each.key)[0]].id
+}
+
+
 resource "tfe_variable" "workspace" {
   for_each = toset(local.individual_workspace_vars)
 

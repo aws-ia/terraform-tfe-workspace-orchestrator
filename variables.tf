@@ -35,6 +35,14 @@ variable "workspaces" {
 EOF
 }
 
+
+
+variable "shared_variable_set_named" {
+  description = "A map of variable sets to set on all created workspaces. These must be pre-existing or the module must explicitly depend on them."
+  type        = map(string)
+  default     = {}
+}
+
 variable "shared_variable_set_ids" {
   description = "A variable set ID to set to all workspaces. Use if you have a pre-existing variable set."
   type        = list(string)

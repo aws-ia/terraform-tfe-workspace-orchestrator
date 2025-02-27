@@ -83,7 +83,7 @@ vcs_repo = {
 
 | Name | Version |
 |------|---------|
-| <a name="provider_tfe"></a> [tfe](#provider\_tfe) | 0.64.0 |
+| <a name="provider_tfe"></a> [tfe](#provider\_tfe) | >= 0.60.0 |
 
 ## Modules
 

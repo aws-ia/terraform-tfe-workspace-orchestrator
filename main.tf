@@ -22,6 +22,8 @@ resource "tfe_workspace" "main" {
   global_remote_state           = try(each.value["global_remote_state"], null)
   remote_state_consumer_ids     = try(each.value["remote_state_consumer_ids"], null)
   queue_all_runs                = try(each.value["queue_all_runs"], true)
+  source_name                   = try(each.value["source_name"], null)
+  source_url                    = try(each.value["source_url"], null)
   speculative_enabled           = try(each.value["speculative_enabled"], true)
   structured_run_output_enabled = try(each.value["structured_run_output_enabled"], true)
   ssh_key_id                    = try(each.value["ssh_key_id"], null)

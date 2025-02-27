@@ -45,7 +45,10 @@ resource "tfe_workspace" "main" {
   }
 
   lifecycle {
-    ignore_changes = ["source_name"]
+    ignore_changes = [
+      source_name,
+      source_url
+    ]
   }
 }
 

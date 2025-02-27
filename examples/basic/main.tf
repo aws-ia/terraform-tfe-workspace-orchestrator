@@ -5,9 +5,14 @@
 #####################################################################################
 
 module "multi_region_deployment" {
-  source = "../.."
+  depends_on = [tfe_variable_set.test]
+  source     = "../.."
 
   organization = var.organization
+
+  shared_variable_sets = [
+    "test"
+  ]
 
   workspaces = {
     eastcoast = {
@@ -19,4 +24,9 @@ module "multi_region_deployment" {
     }
     westcoast = {}
   }
+}
+
+resource "tfe_variable_set" "test" {
+  name         = "test"
+  organization = var.organization
 }

@@ -8,7 +8,9 @@
 
 ## Providers
 
-No providers.
+| Name | Version |
+|------|---------|
+| <a name="provider_tfe"></a> [tfe](#provider\_tfe) | ~> 0.51 |
 
 ## Modules
 
@@ -18,14 +20,16 @@ No providers.
 
 ## Resources
 
-No resources.
+| Name | Type |
+|------|------|
+| [tfe_variable_set.test](https://registry.terraform.io/providers/hashicorp/tfe/latest/docs/resources/variable_set) | resource |
 
 ## Inputs
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_organization"></a> [organization](#input\_organization) | n/a | `any` | n/a | yes |
-| <a name="input_vcs_repo"></a> [vcs\_repo](#input\_vcs\_repo) | Definition of the VCS repo to attach to every workspace. | <pre>object({<br>    branch                     = optional(string)<br>    github_app_installation_id = optional(string)<br>    identifier                 = string<br>    ingress_submodules         = optional(bool)<br>    oauth_token_id             = optional(string)<br>  })</pre> | `null` | no |
+| <a name="input_vcs_repo"></a> [vcs\_repo](#input\_vcs\_repo) | Definition of the VCS repo to attach to every workspace. | <pre>object({<br/>    branch                     = optional(string)<br/>    github_app_installation_id = optional(string)<br/>    identifier                 = string<br/>    ingress_submodules         = optional(bool)<br/>    oauth_token_id             = optional(string)<br/>  })</pre> | `null` | no |
 
 ## Outputs
 

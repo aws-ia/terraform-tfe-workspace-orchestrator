@@ -22,6 +22,8 @@ resource "tfe_workspace" "main" {
   global_remote_state           = try(each.value["global_remote_state"], null)
   remote_state_consumer_ids     = try(each.value["remote_state_consumer_ids"], null)
   queue_all_runs                = try(each.value["queue_all_runs"], true)
+  source_name                   = try(each.value["source_name"], null)
+  source_url                    = try(each.value["source_url"], null)
   speculative_enabled           = try(each.value["speculative_enabled"], true)
   structured_run_output_enabled = try(each.value["structured_run_output_enabled"], true)
   ssh_key_id                    = try(each.value["ssh_key_id"], null)
@@ -41,6 +43,13 @@ resource "tfe_workspace" "main" {
       oauth_token_id             = (try(each.value.vcs_repo_enable, false) && can(each.value.vcs_repo != null)) ? try(local.individual_workspace_vcs_repo_arguments_map[each.key].oauth_token_id, null) : try(var.vcs_repo.oauth_token_id, null)
     }
   }
+
+  lifecycle {
+    ignore_changes = [
+      source_name,
+      source_url
+    ]
+  }
 }
 
 # attach pre-existing variable set to workspaces
@@ -52,6 +61,23 @@ resource "tfe_workspace_variable_set" "shared_preexisting_variable_set_ids" {
 
   variable_set_id = split("/", each.key)[1]
   workspace_id    = tfe_workspace.main[split("/", each.key)[0]].id
+}
+
+resource "tfe_workspace_variable_set" "shared_named_variable_sets" {
+  for_each = toset(length(var.shared_variable_sets) == 0 ?
+    [] :
+    flatten([for w, value in var.workspaces : [for vs in var.shared_variable_sets : "${w}/${vs}"]])
+  )
+
+  variable_set_id = data.tfe_variable_set.shared_variable_sets[split("/", each.key)[1]].id
+  workspace_id    = tfe_workspace.main[split("/", each.key)[0]].id
+}
+
+data "tfe_variable_set" "shared_variable_sets" {
+  for_each = toset(var.shared_variable_sets)
+
+  name         = each.key
+  organization = var.organization
 }
 
 resource "tfe_variable" "workspace" {

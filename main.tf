@@ -43,6 +43,10 @@ resource "tfe_workspace" "main" {
       oauth_token_id             = (try(each.value.vcs_repo_enable, false) && can(each.value.vcs_repo != null)) ? try(local.individual_workspace_vcs_repo_arguments_map[each.key].oauth_token_id, null) : try(var.vcs_repo.oauth_token_id, null)
     }
   }
+
+  lifecycle {
+    ignore_changes = ["source_name"]
+  }
 }
 
 # attach pre-existing variable set to workspaces

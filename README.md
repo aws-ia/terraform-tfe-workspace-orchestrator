@@ -1,4 +1,3 @@
-<!-- BEGIN_TF_DOCS -->
 # Terraform Cloud Multi-Region Deployment with Workspaces
 
 If you want to deploy a terraform module to multiple locations (different VPCs, Regions, Accounts) this module can help. In most examples we use regions as the location separator but that doesnt have to be the case. The premise is simple, create your root module in a public VCS repo then using your Terraform Cloud (TFC) Organization, create workspaces for each deployment location.
@@ -72,6 +71,7 @@ vcs_repo = {
 }
 ```
 
+<!-- BEGIN_TF_DOCS -->
 ## Requirements
 
 | Name | Version |
